@@ -422,6 +422,46 @@ class Set:
         for scene in self.scenes:
             print(" - %s" % scene)
 
+
+    def dump_to_txt(self):
+        """
+        Dump the current Set structure, showing the hierarchy of
+        Group, Track, Clip, Device and Parameter objects.
+        """
+        dump_text = ""
+
+        if len(self.tracks) == 0:
+            self.logger.info("dump: currently empty, performing scan")
+            self.scan()
+
+        dump_text += "────────────────────────────────────────────────────────\n"
+        dump_text += "Live set with %d tracks in %d groups, total %d clips\n" % \
+                    (len(self.tracks), len(self.groups), sum(len(track.active_clips) for track in self.tracks))
+        dump_text += "────────────────────────────────────────────────────────\n"
+
+        for track in self.tracks:
+            if track.is_group:
+                dump_text += "────────────────────────────────────────\n"
+                dump_text += str(track) + "\n"
+            else:
+                dump_text += " - %s\n" % str(track)
+                if track.devices:
+                    for device in track.devices:
+                        dump_text += "    - %s\n" % device
+                if track.active_clips:
+                    for clip in track.active_clips:
+                        dump_text += "    - %s\n" % clip
+
+        dump_text += "────────────────────────────────────────────────────────\n"
+        dump_text += "Scenes\n"
+        dump_text += "────────────────────────────────────────────────────────\n"
+
+        for scene in self.scenes:
+            dump_text += " - %s\n" % scene
+
+        return dump_text
+        
+    
     def _next_beat_callback(self, beats):
         self._next_beat_event.set()
 
